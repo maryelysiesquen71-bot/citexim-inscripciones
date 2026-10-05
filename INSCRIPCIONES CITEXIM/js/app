@@ -1,0 +1,117 @@
+// ==============================================
+// INICIALIZACIÓN Y FLUJO PRINCIPAL DE LA APP
+// ==============================================
+
+function initApp() {
+    console.log("Inicializando aplicación...");
+    const ticketSelect = document.getElementById('ticket-type');
+    
+    if (!ticketSelect) {
+        console.error("No se encontró el elemento select #ticket-type");
+        return;
+    }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Cargar Configuración Inicial en la UI
+    document.getElementById('event-logo').src = CONFIG.evento.logo;
+    document.getElementById('bcp-account').textContent = CONFIG.pago.cuenta;
+    document.getElementById('cci-account').textContent = CONFIG.pago.cci;
+    document.getElementById('account-holder').textContent = CONFIG.pago.titular;
+
+    // 2. Poblar opciones de Entradas
+    const ticketSelect = document.getElementById('ticket-type');
+    CONFIG.entradas.forEach(ticket => {
+        const option = document.createElement('option');
+        option.value = ticket.id;
+        option.textContent = ticket.nombre;
+        ticketSelect.appendChild(option);
+    });
+
+    // 3. Escuchar cambios para actualización de precios y asistentes
+    const qtyInput = document.getElementById('ticket-quantity');
+
+    function updateFormState() {
+        const selectedTicketId = ticketSelect.value;
+        const qty = parseInt(qtyInput.value, 10) || 1;
+
+        // Recalcular Precios
+        const priceInfo = calculatePricing(selectedTicketId, qty);
+        document.getElementById('summary-unit-price').textContent = `S/ ${priceInfo.unitPrice.toFixed(2)}`;
+        document.getElementById('summary-qty').textContent = qty;
+        document.getElementById('summary-total').textContent = `S/ ${priceInfo.total.toFixed(2)}`;
+
+        // Renderizar bloques de asistentes dinámicamente
+        document.getElementById('attendees-count-label').textContent = qty;
+        renderAttendeeFields(qty);
+    }
+
+    ticketSelect.addEventListener('change', updateFormState);
+    qtyInput.addEventListener('input', updateFormState);
+
+    // Render inicial
+    updateFormState();
+
+    // 4. Manejo de envío de formulario (Apertura de Modal)
+    let currentPayload = null;
+    let currentFile = null;
+
+    const form = document.getElementById('registration-form');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        if (!validateRegistrationForm()) {
+            return;
+        }
+
+        const qty = parseInt(qtyInput.value, 10);
+        const selectedTicket = CONFIG.entradas.find(t => t.id === ticketSelect.value);
+        const pricing = calculatePricing(ticketSelect.value, qty);
+        const fileInput = document.getElementById('payment-receipt');
+        currentFile = fileInput.files[0];
+
+        // Recopilar lista de asistentes
+        const attendeesList = [];
+        for (let i = 1; i <= qty; i++) {
+            attendeesList.push({
+                nombre: document.querySelector(`input[name="attendee_name_${i}"]`).value.trim(),
+                telefono: document.querySelector(`input[name="attendee_phone_${i}"]`).value.trim(),
+                correo: document.querySelector(`input[name="attendee_email_${i}"]`).value.trim()
+            });
+        }
+
+        currentPayload = {
+            idInscripcion: 'REG-' + Date.now(),
+            fecha: new Date().toLocaleString(),
+            buyerName: document.getElementById('buyer-name').value.trim(),
+            buyerEmail: document.getElementById('buyer-email').value.trim(),
+            ticketId: ticketSelect.value,
+            ticketName: selectedTicket.nombre,
+            quantity: qty,
+            unitPrice: pricing.unitPrice,
+            totalPrice: pricing.total,
+            fileName: currentFile.name,
+            attendees: attendeesList
+        };
+
+        openSummaryModal(currentPayload);
+    });
+
+    // Eventos del Modal
+    document.getElementById('btn-edit-modal').addEventListener('click', closeModal);
+
+    document.getElementById('btn-confirm-modal').addEventListener('click', async () => {
+        const btnConfirm = document.getElementById('btn-confirm-modal');
+        btnConfirm.disabled = true;
+        btnConfirm.textContent = 'Procesando inscripción...';
+
+        try {
+            await sendRegistrationData(currentPayload, currentFile);
+            alert('¡Inscripción registrada con éxito! Revisa tu correo electrónico.');
+            window.location.reload();
+        } catch (err) {
+            alert('Ocurrió un inconveniente al enviar tu inscripción. Por favor intenta nuevamente.');
+            btnConfirm.disabled = false;
+            btnConfirm.textContent = 'CONFIRMAR INSCRIPCIÓN';
+        }
+    });
+})};

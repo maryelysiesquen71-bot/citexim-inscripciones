@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscripción al Evento</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Columna Izquierda: Información -->
+        <div class="info-sidebar">
+            <img id="event-logo" src="" alt="Logo Evento" class="branding-logo">
+            <p style="color: var(--muted-color); font-weight: 600;">— INSCRIPCIÓN</p>
+            <h1 class="main-title">Vamos a reservar tu lugar.</h1>
+            <p style="color: var(--muted-color);">Completa los datos de cada asistente y adjunta el comprobante. La inscripción queda pendiente hasta que se revise el pago.</p>
+        </div>
+
+        <!-- Columna Derecha: Formulario -->
+        <div class="form-card">
+            <form id="registration-form" novalidate>
+                <!-- Paso 1 -->
+                <div class="step-header">
+                    <span class="step-number">01</span>
+                    <div>
+                        <h3 style="margin:0;">Datos de inscripción</h3>
+                        <small style="color:var(--muted-color)">Una persona de contacto para todo el grupo.</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="buyer-name">Nombre de contacto</label>
+                        <input type="text" id="buyer-name" placeholder="Nombre y apellidos" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="buyer-email">Correo de contacto</label>
+                        <input type="email" id="buyer-email" placeholder="nombre@correo.com" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ticket-type">Tipo de entrada</label>
+                        <select id="ticket-type" required>
+                            <option value="basico">BÁSICO</option>
+                            <option value="vip">VIP</option>
+                            <option value="premium">PREMIUM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticket-quantity">Cantidad</label>
+                        <input type="number" id="ticket-quantity" min="1" max="50" value="1" required>
+                    </div>
+                </div>
+
+                <!-- Resumen de Precios Automático -->
+                <div class="price-summary-box">
+                    <div class="price-item">
+                        <span>Precio por asistente</span>
+                        <strong id="summary-unit-price">S/ 0.00</strong>
+                    </div>
+                    <div class="price-item">
+                        <span>Cantidad</span>
+                        <strong id="summary-qty">1</strong>
+                    </div>
+                    <div class="price-item">
+                        <span>Total a pagar</span>
+                        <strong id="summary-total" style="color: #0b2545;">S/ 0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Paso 2: Asistentes Adicionales -->
+                <div class="step-header" style="margin-top: 30px;">
+                    <span class="step-number">02</span>
+                    <div>
+                        <h3 style="margin:0;">Asistentes (<span id="attendees-count-label">1</span>)</h3>
+                        <small style="color:var(--muted-color)">Una entrada individual para cada asistente.</small>
+                    </div>
+                </div>
+
+                <div id="attendees-container"></div>
+
+                <!-- Paso 3: Instrucciones de Pago y Comprobante -->
+                <div class="step-header" style="margin-top: 30px;">
+                    <span class="step-number">03</span>
+                    <div>
+                        <h3 style="margin:0;">Pago y Comprobante</h3>
+                    </div>
+                </div>
+
+                <div class="payment-instructions" style="background:#f1f5f9; padding:15px; border-radius:8px; margin-bottom:15px;">
+                    <p style="margin:4px 0;"><strong>Cuenta BCP Soles:</strong> <span id="bcp-account">19113494951062</span> <button type="button" class="btn-copy" onclick="copyToClipboard('19113494951062')">Copiar</button></p>
+                    <p style="margin:4px 0;"><strong>CCI:</strong> <span id="cci-account">00219111349495106258</span> <button type="button" class="btn-copy" onclick="copyToClipboard('00219111349495106258')">Copiar</button></p>
+                    <p style="margin:4px 0;"><strong>Titular:</strong> <span id="account-holder">PENDIENTE DE CONFIGURAR</span></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="payment-receipt">Subir comprobante de pago</label>
+                    <input type="file" id="payment-receipt" accept="image/jpeg,image/png,application/pdf" required>
+                    <small id="file-error" style="color:red; display:none;"></small>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top:20px;">Revisar Resumen e Inscribir</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="summary-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2>RESUMEN DE INSCRIPCIÓN</h2>
+            <div id="modal-body-content"></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="button" id="btn-edit-modal" class="btn-secondary">Editar datos</button>
+                <button type="button" id="btn-confirm-modal" class="btn-primary">CONFIRMAR INSCRIPCIÓN</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/pricing.js"></script>
+    <script src="js/form.js"></script>
+    <script src="js/validation.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/payment.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
